@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glowing Booth Chicago — Photo Booth Rentals</title>
+  <meta name="description" content="Chicago's most fun photo booth rental. Weddings, birthdays, quinceañeras, corporate events. Instant prints, custom branding, props included.">
+
+  <!-- Plus Jakarta Sans — rounded, modern, Gen Z -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,700&display=swap" rel="stylesheet">
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --vanilla:   #FFFAEE;
+      --charcoal:  #191919;
+      --orange:    #FE5102;
+      --orange-dk: #E64400;
+      --mono-50:   #787878;
+      --mono-20:   #DDDEE2;
+      --mono-10:   #F0F0F0;
+
+      /* Pastels */
+      --lavender:  #C4B5FD;
+      --pink:      #F9A8D4;
+      --yellow:    #FDE68A;
+      --mint:      #6EE7B7;
+      --rose:      #FDA4AF;
+
+      --font: 'Plus Jakarta Sans', 'Helvetica Neue', sans-serif;
+
+      --r-sm: 8px; --r-md: 16px; --r-lg: 24px;
+      --r-xl: 32px; --r-full: 9999px;
+
+      --container: 1184px;
+      --pad: clamp(20px, 5vw, 80px);
+
+      --dur-fast: 150ms; --dur-normal: 280ms; --dur-slow: 480ms;
+      --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-ed: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font);
+      background: var(--vanilla);
+      color: var(--charcoal);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      opacity: 0;
+      transition: opacity 0.5s var(--ease-ed);
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+
+    /* ── Layout ── */
+    .wrap {
+      width: 100%;
+      max-width: var(--container);
+      margin-inline: auto;
+      padding-inline: var(--pad);
+    }
+    .section { padding-block: clamp(64px, 10vw, 120px); }
+
+    /* ── Nav ── */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px var(--pad);
+      background: rgba(255, 250, 238, 0.88);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--mono-20);
+    }
+    .nav-logo {
+      font-size: 18px; font-weight: 800; letter-spacing: -0.03em;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .nav-logo .dot { color: var(--orange); }
+    .nav-links { display: flex; gap: 32px; align-items: center; }
+    .nav-link { font-size: 14px; font-weight: 600; color: var(--mono-50); transition: color var(--dur-fast); }
+    .nav-link:hover { color: var(--charcoal); }
+    @media (max-width: 768px) { .nav-links { display: none; } }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 12px 24px; border-radius: var(--r-full);
+      font-family: var(--font); font-size: 15px; font-weight: 700;
+      border: none; cursor: pointer; transition: transform var(--dur-fast) var(--ease-spring), background var(--dur-fast);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--charcoal); color: var(--vanilla); }
+    .btn-primary:hover { background: #2a2a2a; }
+    .btn-orange { background: var(--orange); color: #fff; }
+    .btn-orange:hover { background: var(--orange-dk); }
+    .btn-outline { background: transparent; border: 2px solid var(--mono-20); color: var(--charcoal); }
+    .btn-outline:hover { border-color: var(--charcoal); }
+    .btn-lg { padding: 16px 36px; font-size: 16px; }
+
+    /* ── Sticker tags ── */
+    .sticker {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: var(--r-full);
+      font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+    }
+    .sticker-yellow  { background: var(--yellow);   color: var(--charcoal); }
+    .sticker-lavender{ background: var(--lavender);  color: var(--charcoal); }
+    .sticker-pink    { background: var(--pink);      color: var(--charcoal); }
+    .sticker-mint    { background: var(--mint);      color: var(--charcoal); }
+    .sticker-orange  { background: var(--orange);    color: #fff; }
+    .sticker-dark    { background: var(--charcoal);  color: var(--vanilla); }
+
+    /* ── Floating props ── */
+    .prop {
+      position: absolute; pointer-events: none; user-select: none;
+      line-height: 1; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
+      z-index: 2;
+    }
+    @keyframes floatA { 0%,100%{transform:translateY(0) rotate(-12deg)} 50%{transform:translateY(-14px) rotate(-12deg)} }
+    @keyframes floatB { 0%,100%{transform:translateY(0) rotate(8deg)}  50%{transform:translateY(-10px) rotate(8deg)} }
+    @keyframes floatC { 0%,100%{transform:translateY(0) rotate(20deg)} 50%{transform:translateY(-18px) rotate(20deg)} }
+    @keyframes floatD { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-20px) rotate(-5deg)} }
+    .fa { animation: floatA 3.8s ease-in-out infinite; }
+    .fb { animation: floatB 4.5s ease-in-out infinite 0.6s; }
+    .fc { animation: floatC 5.2s ease-in-out infinite 1.2s; }
+    .fd { animation: floatD 3.2s ease-in-out infinite 0.3s; }
+    @media (max-width: 640px) { .prop { display: none; } }
+
+    /* ── Photo strip card ── */
+    .strip-card {
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+    }
+    .strip-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
+    .hero {
+      min-height: 100svh;
+      padding-top: 80px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 40px;
+      padding-inline: var(--pad);
+      max-width: var(--container);
+      margin-inline: auto;
+      position: relative;
+      overflow: visible;
+    }
+    .hero-left { position: relative; z-index: 3; padding-block: 80px; }
+    .hero-pills {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 28px;
+    }
+    .hero-pill {
+      padding: 6px 14px; border-radius: var(--r-full);
+      font-size: 12px; font-weight: 700;
+      border: 1.5px solid var(--mono-20);
+      color: var(--mono-50);
+      transform: rotate(var(--rot, 0deg));
+    }
+    .hero-headline {
+      font-size: clamp(52px, 7vw, 96px);
+      font-weight: 800;
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+    }
+    .hero-headline em {
+      font-style: italic;
+      color: var(--orange);
+    }
+    .hero-sub {
+      font-size: 17px; color: var(--mono-50); line-height: 1.6;
+      max-width: 400px; margin-bottom: 36px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .hero-proof {
+      margin-top: 36px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-proof-text { font-size: 13px; font-weight: 600; color: var(--mono-50); }
+    .hero-proof-stars { color: var(--orange); letter-spacing: 2px; font-size: 14px; }
+
+    /* Hero right — booth + visuals */
+    .hero-right {
+      position: relative; height: 600px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .hero-blob {
+      position: absolute;
+      width: 420px; height: 420px;
+      background: var(--lavender);
+      border-radius: 60% 40% 70% 30% / 50% 60% 40% 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+    }
+    .hero-blob-2 {
+      position: absolute;
+      width: 200px; height: 200px;
+      background: var(--yellow);
+      border-radius: 50% 70% 40% 60% / 60% 40% 70% 50%;
+      bottom: 5%; right: 0%;
+      z-index: 0;
+      opacity: 0.7;
+    }
+    .hero-booth {
+      position: relative; z-index: 2;
+      width: 220px;
+      filter: drop-shadow(0 24px 48px rgba(254,81,2,0.2));
+      animation: floatD 5s ease-in-out infinite;
+    }
+    .hero-strip-1 {
+      position: absolute;
+      right: -20px; top: 8%;
+      width: 110px;
+      z-index: 3;
+      transform: rotate(6deg);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+      border-radius: 8px; overflow: hidden;
+    }
+    .hero-strip-2 {
+      position: absolute;
+      left: -10px; bottom: 10%;
+      width: 100px;
+      z-index: 3;
+      transform: rotate(-8deg);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+      border-radius: 8px; overflow: hidden;
+    }
+    .hero-rating-card {
+      position: absolute;
+      bottom: 18%; right: -30px;
+      background: #fff;
+      border-radius: var(--r-lg);
+      padding: 12px 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 4;
+      display: flex; flex-direction: column; gap: 2px;
+      min-width: 140px;
+    }
+    .hero-rating-card .stars { color: var(--orange); font-size: 14px; letter-spacing: 2px; }
+    .hero-rating-card .rating-label { font-size: 11px; font-weight: 700; color: var(--mono-50); }
+    .hero-rating-card .rating-num { font-size: 22px; font-weight: 800; letter-spacing: -0.04em; }
+    .hero-events-card {
+      position: absolute;
+      top: 12%; left: -40px;
+      background: var(--yellow);
+      border-radius: var(--r-lg);
+      padding: 12px 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      z-index: 4;
+      transform: rotate(-4deg);
+    }
+    .hero-events-card .ev-num { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+    .hero-events-card .ev-label { font-size: 11px; font-weight: 700; color: var(--charcoal); opacity: 0.6; }
+
+    @media (max-width: 900px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; padding-block: 100px 60px; }
+      .hero-right { height: 360px; }
+      .hero-booth { width: 150px; }
+      .hero-blob { width: 280px; height: 280px; }
+      .hero-blob-2 { width: 130px; height: 130px; }
+    }
+
+    /* ═══════════════════════════════════════════
+       TICKER
+    ═══════════════════════════════════════════ */
+    .ticker {
+      background: var(--charcoal);
+      padding-block: 14px;
+      overflow: hidden;
+    }
+    .ticker-track { display: flex; gap: 48px; white-space: nowrap; width: max-content; }
+    .ticker-item {
+      font-size: 13px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--vanilla);
+      display: flex; align-items: center; gap: 48px;
+    }
+    .ticker-item::after { content: '✦'; color: var(--orange); font-size: 10px; }
+
+    /* ═══════════════════════════════════════════
+       STRIP GALLERY (horizontal scroll)
+    ═══════════════════════════════════════════ */
+    .strip-scroll-section { padding-block: clamp(48px, 6vw, 80px); overflow: hidden; }
+    .strip-scroll-label {
+      padding-inline: var(--pad);
+      max-width: var(--container);
+      margin-inline: auto;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px;
+    }
+    .section-eyebrow {
+      font-size: 12px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--orange);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-eyebrow::before { content: ''; display: block; width: 20px; height: 2px; background: var(--orange); }
+    .strip-scroll-track {
+      display: flex; gap: 20px;
+      padding-inline: var(--pad);
+      overflow-x: auto; scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+    }
+    .strip-scroll-track::-webkit-scrollbar { display: none; }
+    .strip-scroll-track:active { cursor: grabbing; }
+    .scroll-card {
+      flex-shrink: 0; scroll-snap-align: start;
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      position: relative;
+    }
+    .scroll-card-strip {
+      width: 160px; height: 420px;
+    }
+    .scroll-card-event {
+      width: 320px; height: 420px;
+      background: var(--mono-10);
+      display: grid; place-items: center;
+    }
+    .scroll-card img { width: 100%; height: 100%; object-fit: cover; }
+    .scroll-card-placeholder {
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      color: var(--mono-50);
+    }
+    .scroll-card-placeholder .ph-emoji { font-size: 48px; }
+    .scroll-card-placeholder .ph-label { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+    .scroll-card-label {
+      position: absolute; bottom: 16px; left: 16px; right: 16px;
+    }
+
+    /* ═══════════════════════════════════════════
+       WHY / FEATURES
+    ═══════════════════════════════════════════ */
+    .why-section { background: var(--charcoal); color: var(--vanilla); }
+    .why-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 6vw, 100px);
+      align-items: center;
+    }
+    .why-headline {
+      font-size: clamp(36px, 5vw, 64px);
+      font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
+    }
+    .why-headline em { font-style: italic; color: var(--orange); }
+    .why-sub { color: rgba(255,250,238,0.55); font-size: 16px; line-height: 1.7; margin-top: 20px; }
+    .why-features { display: flex; flex-direction: column; gap: 0; }
+    .why-feature {
+      display: flex; gap: 20px; align-items: flex-start;
+      padding-block: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .why-feature:first-child { padding-top: 0; }
+    .why-feature:last-child { border-bottom: none; }
+    .feature-icon {
+      font-size: 28px; flex-shrink: 0;
+      width: 52px; height: 52px;
+      background: rgba(255,255,255,0.06);
+      border-radius: var(--r-md);
+      display: grid; place-items: center;
+    }
+    .feature-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+    .feature-desc { font-size: 14px; color: rgba(255,250,238,0.5); line-height: 1.6; }
+    @media (max-width: 768px) { .why-inner { grid-template-columns: 1fr; } }
+
+    /* ═══════════════════════════════════════════
+       ABOUT / FOUNDER
+    ═══════════════════════════════════════════ */
+    .about-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 6vw, 100px);
+      align-items: center;
+    }
+    .about-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .about-headline {
+      font-size: clamp(32px, 4vw, 56px);
+      font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
+      margin-bottom: 20px;
+    }
+    .about-headline em { font-style: italic; color: var(--orange); }
+    .about-sub { font-size: 16px; color: var(--mono-50); line-height: 1.7; margin-bottom: 28px; }
+    .about-bullets { display: flex; flex-direction: column; gap: 12px; margin-bottom: 36px; }
+    .about-bullet { font-size: 15px; font-weight: 600; display: flex; gap: 10px; }
+    .about-bullet::before { content: '→'; color: var(--orange); flex-shrink: 0; }
+
+    /* Pinboard right side */
+    .about-pinboard {
+      position: relative; height: 520px;
+    }
+    .pinboard-bg {
+      position: absolute; inset: 0;
+      background: var(--mono-10);
+      border-radius: var(--r-xl);
+    }
+    .pin-strip-1 {
+      position: absolute;
+      top: 30px; left: 40px;
+      width: 130px;
+      transform: rotate(-5deg);
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+      z-index: 2;
+    }
+    .pin-strip-2 {
+      position: absolute;
+      bottom: 30px; right: 40px;
+      width: 115px;
+      transform: rotate(6deg);
+      border-radius: 8px; overflow: hidden;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+      z-index: 2;
+    }
+    .pin-card {
+      position: absolute;
+      background: #fff;
+      border-radius: var(--r-lg);
+      padding: 16px 20px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+      z-index: 3;
+    }
+    .pin-card-events {
+      top: 40px; right: 30px;
+      background: var(--yellow);
+      transform: rotate(3deg);
+    }
+    .pin-card-events .pce-num { font-size: 36px; font-weight: 800; letter-spacing: -0.04em; }
+    .pin-card-events .pce-label { font-size: 11px; font-weight: 700; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.06em; }
+    .pin-card-rating {
+      bottom: 80px; left: 24px;
+      transform: rotate(-2deg);
+    }
+    .pin-card-rating .pcr-stars { color: var(--orange); font-size: 16px; letter-spacing: 3px; margin-bottom: 4px; }
+    .pin-card-rating .pcr-text { font-size: 12px; font-weight: 700; color: var(--mono-50); }
+    .pin-card-rating .pcr-num { font-size: 28px; font-weight: 800; letter-spacing: -0.04em; }
+    .pin-card-ig {
+      bottom: 30px; left: 50%;
+      transform: translateX(-50%) rotate(1deg);
+      background: var(--lavender);
+      display: flex; align-items: center; gap: 10px;
+      white-space: nowrap;
+    }
+    .pin-card-ig .ig-icon { font-size: 20px; }
+    .pin-card-ig .ig-handle { font-size: 13px; font-weight: 800; }
+    @media (max-width: 768px) { .about-inner { grid-template-columns: 1fr; } .about-pinboard { height: 380px; } }
+
+    /* ═══════════════════════════════════════════
+       STATS
+    ═══════════════════════════════════════════ */
+    .stats-section { background: var(--charcoal); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .stat-block {
+      border-radius: var(--r-xl);
+      padding: 44px 36px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .stat-block-yellow  { background: var(--yellow); }
+    .stat-block-mint    { background: var(--mint); }
+    .stat-block-lavender{ background: var(--lavender); }
+    .stat-emoji {
+      font-size: 36px; margin-bottom: 12px;
+      display: block;
+    }
+    .stat-number {
+      font-size: clamp(48px, 6vw, 72px);
+      font-weight: 800; letter-spacing: -0.05em;
+      color: var(--charcoal); line-height: 1;
+      display: block;
+    }
+    .stat-label {
+      font-size: 13px; font-weight: 700;
+      color: var(--charcoal); opacity: 0.55;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      margin-top: 8px; display: block;
+    }
+    @media (max-width: 640px) { .stats-grid { grid-template-columns: 1fr; } }
+
+    /* ═══════════════════════════════════════════
+       PACKAGES
+    ═══════════════════════════════════════════ */
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 56px;
+    }
+    .pkg-card {
+      border: 2px solid var(--mono-20);
+      border-radius: var(--r-xl);
+      padding: 36px 32px;
+      display: flex; flex-direction: column;
+      position: relative;
+      transition: border-color var(--dur-normal), transform var(--dur-normal) var(--ease-spring);
+      background: #fff;
+    }
+    .pkg-card:hover { border-color: var(--charcoal); transform: translateY(-4px); }
+    .pkg-card.featured { border-color: var(--charcoal); border-width: 2px; }
+    .pkg-badge {
+      position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+      background: var(--charcoal); color: var(--vanilla);
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 5px 18px; border-radius: var(--r-full);
+      white-space: nowrap;
+    }
+    .pkg-emoji { font-size: 36px; margin-bottom: 16px; display: block; }
+    .pkg-duration {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--orange);
+      margin-bottom: 8px;
+    }
+    .pkg-name {
+      font-size: 28px; font-weight: 800; letter-spacing: -0.04em;
+      margin-bottom: 6px;
+    }
+    .pkg-price {
+      font-size: 48px; font-weight: 800; letter-spacing: -0.05em;
+      margin-bottom: 28px; line-height: 1;
+    }
+    .pkg-price span { font-size: 16px; font-weight: 500; color: var(--mono-50); }
+    .pkg-features { flex: 1; display: flex; flex-direction: column; gap: 10px; margin-bottom: 32px; }
+    .pkg-feature {
+      font-size: 14px; font-weight: 500; color: var(--mono-50);
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .pkg-feature::before { content: '✓'; color: var(--orange); font-weight: 800; flex-shrink: 0; }
+    @media (max-width: 900px) { .packages-grid { grid-template-columns: 1fr; max-width: 400px; margin-inline: auto; } }
+
+    /* ═══════════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════════ */
+    .how-section { background: var(--charcoal); color: var(--vanilla); }
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+      margin-top: 64px;
+    }
+    .step-num {
+      font-size: 80px; font-weight: 800; letter-spacing: -0.05em;
+      line-height: 1; color: rgba(255,255,255,0.08);
+      margin-bottom: 16px;
+    }
+    .step-title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; }
+    .step-desc { font-size: 14px; color: rgba(255,250,238,0.45); line-height: 1.7; }
+    @media (max-width: 768px) { .steps-grid { grid-template-columns: 1fr; gap: 40px; } }
+
+    /* ═══════════════════════════════════════════
+       TESTIMONIALS
+    ═══════════════════════════════════════════ */
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 56px;
+    }
+    .testi-card {
+      border-radius: var(--r-xl);
+      padding: 28px;
+      transition: transform var(--dur-normal) var(--ease-spring);
+    }
+    .testi-card:hover { transform: translateY(-4px); }
+    .testi-card-1 { background: var(--lavender); }
+    .testi-card-2 { background: var(--pink); }
+    .testi-card-3 { background: var(--yellow); }
+    .testi-stars { font-size: 16px; letter-spacing: 2px; color: var(--charcoal); margin-bottom: 14px; }
+    .testi-quote { font-size: 15px; line-height: 1.7; color: var(--charcoal); margin-bottom: 20px; font-weight: 500; }
+    .testi-author { font-size: 13px; font-weight: 800; color: var(--charcoal); }
+    .testi-event { font-size: 12px; color: rgba(25,25,25,0.5); margin-top: 2px; }
+    @media (max-width: 768px) { .testi-grid { grid-template-columns: 1fr; } }
+
+    /* ═══════════════════════════════════════════
+       BOOKING
+    ═══════════════════════════════════════════ */
+    .booking-section { background: var(--charcoal); color: var(--vanilla); }
+    .booking-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(40px, 6vw, 100px);
+      align-items: start;
+    }
+    .booking-headline {
+      font-size: clamp(36px, 4.5vw, 60px);
+      font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .booking-headline em { font-style: italic; color: var(--orange); }
+    .booking-sub { color: rgba(255,250,238,0.5); font-size: 15px; line-height: 1.7; margin-bottom: 36px; }
+    .contact-list { display: flex; flex-direction: column; gap: 16px; }
+    .contact-row { display: flex; align-items: center; gap: 14px; font-size: 14px; color: rgba(255,250,238,0.6); }
+    .contact-icon {
+      width: 40px; height: 40px; border-radius: var(--r-md);
+      background: rgba(255,255,255,0.06);
+      display: grid; place-items: center; font-size: 18px; flex-shrink: 0;
+    }
+
+    .form { display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label {
+      font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+      text-transform: uppercase; color: rgba(255,250,238,0.4);
+    }
+    .form-input, .form-select, .form-textarea {
+      background: rgba(255,255,255,0.06);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: var(--r-md);
+      padding: 13px 16px;
+      color: var(--vanilla); font-family: var(--font); font-size: 15px;
+      width: 100%;
+      transition: border-color var(--dur-fast);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none; border-color: var(--orange);
+    }
+    .form-input::placeholder, .form-textarea::placeholder { color: rgba(255,250,238,0.2); }
+    .form-select option { background: #222; }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    @media (max-width: 768px) {
+      .booking-inner { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    /* ═══════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════ */
+    .footer {
+      border-top: 1px solid var(--mono-20);
+      padding-block: 36px;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+    .footer-logo .dot { color: var(--orange); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-link { font-size: 13px; color: var(--mono-50); font-weight: 600; transition: color var(--dur-fast); }
+    .footer-link:hover { color: var(--charcoal); }
+    .footer-copy { font-size: 12px; color: var(--mono-50); }
+
+    /* ── Reveal ── */
+    [data-reveal] {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity var(--dur-slow) var(--ease-ed), transform var(--dur-slow) var(--ease-ed);
+    }
+    [data-reveal].on { opacity: 1; transform: none; }
+    [data-stagger] > * {
+      opacity: 0; transform: translateY(20px);
+      transition: opacity var(--dur-slow) var(--ease-ed), transform var(--dur-slow) var(--ease-ed);
+    }
+    [data-stagger].on > *:nth-child(1) { transition-delay: 0ms;   opacity: 1; transform: none; }
+    [data-stagger].on > *:nth-child(2) { transition-delay: 80ms;  opacity: 1; transform: none; }
+    [data-stagger].on > *:nth-child(3) { transition-delay: 160ms; opacity: 1; transform: none; }
+    [data-stagger].on > *:nth-child(4) { transition-delay: 240ms; opacity: 1; transform: none; }
+    [data-stagger].on > *:nth-child(5) { transition-delay: 320ms; opacity: 1; transform: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav">
+    <a href="#" class="nav-logo">Glowing<span class="dot">.</span>Booth</a>
+    <ul class="nav-links">
+      <li><a href="#about" class="nav-link">About</a></li>
+      <li><a href="#packages" class="nav-link">Packages</a></li>
+      <li><a href="#gallery" class="nav-link">Gallery</a></li>
+      <li><a href="#booking" class="nav-link">Book</a></li>
+    </ul>
+    <a href="#booking" class="btn btn-primary">Book Your Date ✨</a>
+  </nav>
+
+  <!-- ═══════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════ -->
+  <section style="position:relative; overflow:hidden;">
+    <div class="hero">
+
+      <!-- Left -->
+      <div class="hero-left" id="hero-left">
+        <div class="hero-pills">
+          <span class="hero-pill" style="--rot:-2deg">Weddings 💍</span>
+          <span class="hero-pill" style="--rot:1.5deg">Birthdays 🎂</span>
+          <span class="hero-pill" style="--rot:-1deg">Quinceañeras 👑</span>
+          <span class="hero-pill" style="--rot:2deg">Corporate 🎉</span>
+        </div>
+
+        <h1 class="hero-headline" id="hero-h1">
+          The booth that<br>makes your event<br><em>unforgettable.</em>
+        </h1>
+
+        <p class="hero-sub">Chicago's most fun photo booth rental. Instant prints, custom branding, and props that actually slap.</p>
+
+        <div class="hero-actions">
+          <a href="#booking" class="btn btn-orange btn-lg">Book Now →</a>
+          <a href="#packages" class="btn btn-outline btn-lg">See Packages</a>
+        </div>
+
+        <div class="hero-proof">
+          <div class="hero-proof-stars">★★★★★</div>
+          <div class="hero-proof-text">5.0 · 200+ five-star events in Chicago</div>
+        </div>
+      </div>
+
+      <!-- Right -->
+      <div class="hero-right" id="hero-right">
+        <div class="hero-blob"></div>
+        <div class="hero-blob-2"></div>
+
+        <!-- Booth image (text-based fallback if no asset) -->
+        <div class="hero-booth" style="width:200px; height:400px; position:relative; z-index:2;">
+          <div style="
+            width:100%; height:100%;
+            background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+            border-radius: 24px;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            gap:16px; animation: floatD 5s ease-in-out infinite;
+            box-shadow: 0 24px 64px rgba(254,81,2,0.18);
+          ">
+            <div style="font-size:80px;">📸</div>
+            <div style="
+              width:80px; height:80px; border-radius:50%;
+              border: 6px solid #fff;
+              box-shadow: 0 0 0 3px #ccc, 0 0 30px rgba(254,81,2,0.3);
+            "></div>
+            <div style="font-size:13px; font-weight:700; color:#999; text-align:center; padding:0 16px;">
+              Glowing Booth<br>Chicago
+            </div>
+          </div>
+        </div>
+
+        <!-- Photo strips floating -->
+        <div class="hero-strip-1">
+          <img src="../../../../brands/brand-a/references/images/photo-strip-1.jpg" alt="Photo strip from a birthday event" loading="lazy">
+        </div>
+        <div class="hero-strip-2">
+          <img src="../../../../brands/brand-a/references/images/photo-strip-2.jpg" alt="Photo strip from a galentine's event" loading="lazy">
+        </div>
+
+        <!-- Floating cards -->
+        <div class="hero-events-card">
+          <div class="ev-num">500<span style="color:var(--orange)">+</span></div>
+          <div class="ev-label">Events booked</div>
+        </div>
+        <div class="hero-rating-card">
+          <div class="stars">★★★★★</div>
+          <div class="rating-num">5.0</div>
+          <div class="rating-label">Average rating</div>
+        </div>
+
+        <!-- Floating props -->
+        <span class="prop fa" style="font-size:72px; top:2%; right:2%;">🎉</span>
+        <span class="prop fb" style="font-size:56px; bottom:5%; left:2%;">✨</span>
+        <span class="prop fc" style="font-size:48px; top:50%; right:0%;">🪩</span>
+        <span class="prop fd" style="font-size:40px; top:15%; left:8%;">👑</span>
+      </div>
+
+    </div>
+
+    <!-- Full-width floating props on hero -->
+    <span class="prop fa" style="font-size:64px; top:12%; left:2%; z-index:1;">🎈</span>
+    <span class="prop fc" style="font-size:48px; bottom:10%; right:2%; z-index:1;">🎊</span>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       TICKER
+  ═══════════════════════════════════════ -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker-track" id="ticker-track">
+      <span class="ticker-item">Weddings</span>
+      <span class="ticker-item">Birthdays</span>
+      <span class="ticker-item">Quinceañeras</span>
+      <span class="ticker-item">Corporate Events</span>
+      <span class="ticker-item">Sweet 16</span>
+      <span class="ticker-item">Galentine's</span>
+      <span class="ticker-item">Baby Showers</span>
+      <span class="ticker-item">Graduations</span>
+      <span class="ticker-item">Brand Activations</span>
+      <span class="ticker-item">Anniversaries</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       STRIP GALLERY — horizontal scroll
+  ═══════════════════════════════════════ -->
+  <section class="strip-scroll-section" id="gallery">
+    <div class="strip-scroll-label">
+      <div class="section-eyebrow">Real moments</div>
+      <a href="https://www.instagram.com/glowingbooth.chi/" target="_blank" rel="noopener" class="btn btn-outline" style="font-size:13px; padding:10px 20px;">
+        @glowingbooth.chi ↗
+      </a>
+    </div>
+
+    <div class="strip-scroll-track" id="gallery-track">
+
+      <!-- Real strips -->
+      <div class="scroll-card scroll-card-strip">
+        <img src="../../../../brands/brand-a/references/images/photo-strip-1.jpg" alt="Birthday event photo strip" loading="lazy">
+      </div>
+      <div class="scroll-card scroll-card-strip">
+        <img src="../../../../brands/brand-a/references/images/photo-strip-2.jpg" alt="Galentine's event photo strip" loading="lazy">
+      </div>
+
+      <!-- Placeholder event cards — swap with real photos -->
+      <div class="scroll-card scroll-card-event" style="background:var(--lavender);">
+        <div class="scroll-card-placeholder">
+          <span class="ph-emoji">💍</span>
+          <span class="ph-label">Wedding</span>
+        </div>
+      </div>
+      <div class="scroll-card scroll-card-event" style="background:var(--yellow);">
+        <div class="scroll-card-placeholder">
+          <span class="ph-emoji">🎂</span>
+          <span class="ph-label">Birthday</span>
+        </div>
+      </div>
+      <div class="scroll-card scroll-card-event" style="background:var(--pink);">
+        <div class="scroll-card-placeholder">
+          <span class="ph-emoji">👑</span>
+          <span class="ph-label">Quinceañera</span>
+        </div>
+      </div>
+      <div class="scroll-card scroll-card-event" style="background:var(--mint);">
+        <div class="scroll-card-placeholder">
+          <span class="ph-emoji">🏢</span>
+          <span class="ph-label">Corporate</span>
+        </div>
+      </div>
+      <!-- Repeat strips at end -->
+      <div class="scroll-card scroll-card-strip">
+        <img src="../../../../brands/brand-a/references/images/photo-strip-1.jpg" alt="Birthday event photo strip" loading="lazy">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       WHY GLOWING BOOTH
+  ═══════════════════════════════════════ -->
+  <section class="section why-section">
+    <div class="wrap">
+      <div class="why-inner">
+        <div data-reveal>
+          <div class="section-eyebrow" style="color:var(--orange); margin-bottom:20px;">Why us</div>
+          <h2 class="why-headline">Not just a booth.<br>It's the <em>moment.</em></h2>
+          <p class="why-sub">We built Glowing Booth to give your guests something to talk about — long after the event ends. Every detail is dialed in so you don't have to think about it.</p>
+        </div>
+        <div class="why-features" data-stagger>
+          <div class="why-feature">
+            <div class="feature-icon">📸</div>
+            <div>
+              <div class="feature-title">Instant Prints + Digital</div>
+              <div class="feature-desc">Every shot prints in seconds. Plus a digital gallery link sent to every guest — ready to share before the party ends.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="feature-icon">✨</div>
+            <div>
+              <div class="feature-title">Custom Branded Strips</div>
+              <div class="feature-desc">Your event name, date, and theme on every print. We design it, you approve it, guests keep it forever.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="feature-icon">🎭</div>
+            <div>
+              <div class="feature-title">Props That Actually Slap</div>
+              <div class="feature-desc">A curated prop collection — no cheesy plastic. Fun, photo-worthy, and on-theme for any event.</div>
+            </div>
+          </div>
+          <div class="why-feature">
+            <div class="feature-icon">🙋</div>
+            <div>
+              <div class="feature-title">Attendant On-Site</div>
+              <div class="feature-desc">A friendly Glowing Booth host keeps the line moving and makes sure every shot is a hit.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       ABOUT / FOUNDER
+  ═══════════════════════════════════════ -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="about-inner">
+        <div data-reveal>
+          <div class="about-pills" data-stagger>
+            <span class="sticker sticker-yellow">Chicago-born 🌆</span>
+            <span class="sticker sticker-lavender">Teen founder 💡</span>
+            <span class="sticker sticker-pink">Woman-owned 💪</span>
+            <span class="sticker sticker-mint">500+ events ✨</span>
+          </div>
+          <h2 class="about-headline">
+            Started young.<br>Built for <em>real</em> moments.
+          </h2>
+          <p class="about-sub">
+            Glowing Booth was started by a teenage entrepreneur from Chicago who believed every celebration deserved something memorable to take home. What started as one booth and a big dream is now the city's most-loved photo booth experience.
+          </p>
+          <div class="about-bullets">
+            <div class="about-bullet">Personally at every single event — no outsourcing, ever</div>
+            <div class="about-bullet">Chicago-based and locally owned, serving all of Chicagoland</div>
+            <div class="about-bullet">Built for the people who make every party worth attending</div>
+          </div>
+          <a href="#booking" class="btn btn-primary btn-lg">Book directly with us →</a>
+        </div>
+
+        <!-- Pinboard -->
+        <div class="about-pinboard" data-reveal>
+          <div class="pinboard-bg"></div>
+
+          <div class="pin-strip-1">
+            <img src="../../../../brands/brand-a/references/images/photo-strip-1.jpg" alt="Event photo strip" loading="lazy">
+          </div>
+          <div class="pin-strip-2">
+            <img src="../../../../brands/brand-a/references/images/photo-strip-2.jpg" alt="Event photo strip" loading="lazy">
+          </div>
+
+          <div class="pin-card pin-card-events">
+            <div class="pce-num">500<span style="color:var(--orange)">+</span></div>
+            <div class="pce-label">Events & counting</div>
+          </div>
+          <div class="pin-card pin-card-rating">
+            <div class="pcr-stars">★★★★★</div>
+            <div class="pcr-num">5.0</div>
+            <div class="pcr-text">Average Google rating</div>
+          </div>
+          <div class="pin-card pin-card-ig">
+            <span class="ig-icon">📸</span>
+            <span class="ig-handle">@glowingbooth.chi</span>
+          </div>
+
+          <!-- Floating props on pinboard -->
+          <span class="prop fa" style="font-size:48px; top:50%; right:-20px;">🎈</span>
+          <span class="prop fb" style="font-size:40px; bottom:8%; left:-16px;">🎊</span>
+          <span class="prop fc" style="font-size:36px; top:8%; right:10%;">✨</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       STATS
+  ═══════════════════════════════════════ -->
+  <section class="section stats-section">
+    <div class="wrap">
+      <div class="section-eyebrow" style="color:var(--orange); margin-bottom:16px;" data-reveal>By the numbers</div>
+      <h2 style="font-size:clamp(32px,4vw,52px); font-weight:800; letter-spacing:-0.04em; color:var(--vanilla);" data-reveal>Chicago's most-booked booth.</h2>
+      <div class="stats-grid" data-stagger>
+        <div class="stat-block stat-block-yellow">
+          <span class="stat-emoji">🎉</span>
+          <span class="stat-number"><span data-counter="500">0</span>+</span>
+          <span class="stat-label">Events booked</span>
+        </div>
+        <div class="stat-block stat-block-mint">
+          <span class="stat-emoji">📸</span>
+          <span class="stat-number"><span data-counter="50000">0</span>+</span>
+          <span class="stat-label">Photos printed</span>
+        </div>
+        <div class="stat-block stat-block-lavender">
+          <span class="stat-emoji">⭐</span>
+          <span class="stat-number">5.0</span>
+          <span class="stat-label">Average rating</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       PACKAGES
+  ═══════════════════════════════════════ -->
+  <section class="section" id="packages">
+    <div class="wrap">
+      <div class="section-eyebrow" style="margin-bottom:16px;" data-reveal>Packages</div>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:20px; margin-bottom:0;">
+        <h2 style="font-size:clamp(32px,4vw,56px); font-weight:800; letter-spacing:-0.04em;" data-reveal>
+          Pick your vibe.<br>We handle the rest.
+        </h2>
+        <span class="sticker sticker-orange" style="margin-bottom:8px;">All packages include attendant 🙋</span>
+      </div>
+      <div class="packages-grid" data-stagger>
+
+        <div class="pkg-card">
+          <span class="pkg-emoji">✨</span>
+          <div class="pkg-duration">2 Hours</div>
+          <div class="pkg-name">Glow</div>
+          <div class="pkg-price">$399 <span>/ event</span></div>
+          <ul class="pkg-features">
+            <li class="pkg-feature">Up to 2-hour rental</li>
+            <li class="pkg-feature">Instant 2×6 print strips</li>
+            <li class="pkg-feature">Digital gallery access</li>
+            <li class="pkg-feature">Standard prop set</li>
+            <li class="pkg-feature">On-site attendant</li>
+          </ul>
+          <a href="#booking" class="btn btn-outline" style="width:100%; justify-content:center;">Book Glow</a>
+        </div>
+
+        <div class="pkg-card featured">
+          <div class="pkg-badge">⭐ Most Popular</div>
+          <span class="pkg-emoji">🪩</span>
+          <div class="pkg-duration">3 Hours</div>
+          <div class="pkg-name">Radiance</div>
+          <div class="pkg-price">$549 <span>/ event</span></div>
+          <ul class="pkg-features">
+            <li class="pkg-feature">Up to 3-hour rental</li>
+            <li class="pkg-feature">4×6 prints + strips</li>
+            <li class="pkg-feature">Custom branded overlay</li>
+            <li class="pkg-feature">Premium prop collection</li>
+            <li class="pkg-feature">On-site attendant</li>
+            <li class="pkg-feature">Online gallery (30 days)</li>
+          </ul>
+          <a href="#booking" class="btn btn-orange" style="width:100%; justify-content:center;">Book Radiance →</a>
+        </div>
+
+        <div class="pkg-card">
+          <span class="pkg-emoji">🎊</span>
+          <div class="pkg-duration">5 Hours</div>
+          <div class="pkg-name">Full Shine</div>
+          <div class="pkg-price">$849 <span>/ event</span></div>
+          <ul class="pkg-features">
+            <li class="pkg-feature">Up to 5-hour rental</li>
+            <li class="pkg-feature">4×6 prints + strips</li>
+            <li class="pkg-feature">Custom backdrop + overlay</li>
+            <li class="pkg-feature">Full premium prop set</li>
+            <li class="pkg-feature">2 on-site attendants</li>
+            <li class="pkg-feature">Online gallery (90 days)</li>
+            <li class="pkg-feature">Social sharing station</li>
+          </ul>
+          <a href="#booking" class="btn btn-outline" style="width:100%; justify-content:center;">Book Full Shine</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════ -->
+  <section class="section how-section">
+    <div class="wrap">
+      <div class="section-eyebrow" style="color:var(--orange); margin-bottom:16px;" data-reveal>How it works</div>
+      <h2 style="font-size:clamp(32px,4vw,56px); font-weight:800; letter-spacing:-0.04em; color:var(--vanilla);" data-reveal>
+        Simple from start to finish.
+      </h2>
+      <div class="steps-grid" data-stagger>
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-title">Book Online</div>
+          <p class="step-desc">Pick your package, choose your date, and lock it in. We confirm within 24 hours and send a custom design preview for your strip overlay.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-title">We Show Up Early</div>
+          <p class="step-desc">Our team arrives 45 minutes before your event, sets up the full booth, and runs a test — before your first guest walks in.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-title">You Party, We Capture</div>
+          <p class="step-desc">Guests step in, strike a pose, walk out with prints in hand. You enjoy the night — we handle everything else.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       TESTIMONIALS
+  ═══════════════════════════════════════ -->
+  <section class="section" style="position:relative; overflow:hidden;">
+    <div class="wrap">
+      <div class="section-eyebrow" style="margin-bottom:16px;" data-reveal>Reviews</div>
+      <h2 style="font-size:clamp(32px,4vw,56px); font-weight:800; letter-spacing:-0.04em;" data-reveal>
+        Don't take our word for it.
+      </h2>
+      <div class="testi-grid" data-stagger>
+        <div class="testi-card testi-card-1">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Glowing Booth was the best decision we made for our wedding. Every single guest had a photo strip by the end of the night. The attendant was so sweet — kept everything running perfectly."</p>
+          <div class="testi-author">Marisol V.</div>
+          <div class="testi-event">Wedding · Chicago, IL</div>
+        </div>
+        <div class="testi-card testi-card-2">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"We booked the Full Shine for my daughter's quinceañera and it was incredible. The custom strip with her name and date was such a beautiful touch. Everyone went back multiple times!"</p>
+          <div class="testi-author">Carmen R.</div>
+          <div class="testi-event">Quinceañera · Pilsen, IL</div>
+        </div>
+        <div class="testi-card testi-card-3">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Our corporate event needed something fun — Glowing Booth delivered. Setup was seamless, props were hilarious, and our team is still talking about it two months later."</p>
+          <div class="testi-author">James T.</div>
+          <div class="testi-event">Corporate Event · River North, IL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating props in testimonials -->
+    <span class="prop fa" style="font-size:64px; top:10%; right:2%;">🎀</span>
+    <span class="prop fd" style="font-size:48px; bottom:5%; left:1%;">💫</span>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       BOOKING
+  ═══════════════════════════════════════ -->
+  <section class="section booking-section" id="booking">
+    <div class="wrap">
+      <div class="booking-inner">
+        <div data-reveal>
+          <div class="section-eyebrow" style="color:var(--orange); margin-bottom:20px;">Book your date</div>
+          <h2 class="booking-headline">
+            Let's make it <em>unforgettable.</em>
+          </h2>
+          <p class="booking-sub">Fill this out and we'll get back to you within 24 hours with availability and a custom quote. Weekends fill up fast.</p>
+          <div class="contact-list">
+            <div class="contact-row">
+              <div class="contact-icon">📍</div>
+              Serving Chicagoland & surrounding suburbs
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon">📱</div>
+              @glowingbooth.chi on Instagram
+            </div>
+            <div class="contact-row">
+              <div class="contact-icon">⚡</div>
+              Response within 24 hours — usually much faster
+            </div>
+          </div>
+
+          <!-- Strips as social proof -->
+          <div style="display:flex; gap:12px; margin-top:36px;">
+            <div style="width:80px; border-radius:8px; overflow:hidden; transform:rotate(-4deg); box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+              <img src="../../../../brands/brand-a/references/images/photo-strip-1.jpg" alt="Sample strip" loading="lazy">
+            </div>
+            <div style="width:72px; border-radius:8px; overflow:hidden; transform:rotate(3deg); box-shadow:0 8px 24px rgba(0,0,0,0.3);">
+              <img src="../../../../brands/brand-a/references/images/photo-strip-2.jpg" alt="Sample strip" loading="lazy">
+            </div>
+            <div style="display:flex; align-items:center; padding-left:8px; color:rgba(255,250,238,0.4); font-size:13px; font-weight:600; line-height:1.5;">
+              This could be your<br>event prints 📸
+            </div>
+          </div>
+        </div>
+
+        <form class="form" data-reveal onsubmit="handleSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="name">Your Name</label>
+              <input class="form-input" type="text" id="name" placeholder="First & last" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-input" type="email" id="email" placeholder="you@email.com" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone</label>
+              <input class="form-input" type="tel" id="phone" placeholder="(312) 000-0000">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="date">Event Date</label>
+              <input class="form-input" type="date" id="date" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="type">Event Type</label>
+              <select class="form-select" id="type">
+                <option value="" disabled selected>Select type</option>
+                <option>Wedding 💍</option>
+                <option>Birthday 🎂</option>
+                <option>Quinceañera 👑</option>
+                <option>Corporate 🏢</option>
+                <option>Graduation 🎓</option>
+                <option>Sweet 16 🎉</option>
+                <option>Baby Shower 🍼</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="pkg">Package</label>
+              <select class="form-select" id="pkg">
+                <option value="" disabled selected>Select package</option>
+                <option>Glow — $399 (2hr) ✨</option>
+                <option>Radiance — $549 (3hr) 🪩</option>
+                <option>Full Shine — $849 (5hr) 🎊</option>
+                <option>Not sure yet</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="msg">Anything else?</label>
+            <textarea class="form-textarea" id="msg" placeholder="Venue, guest count, theme, special requests..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-orange btn-lg" style="width:100%; justify-content:center; margin-top:4px;">
+            Send My Request ✨
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-inner">
+        <div class="footer-logo">Glowing<span class="dot">.</span>Booth</div>
+        <ul class="footer-links">
+          <li><a href="#about" class="footer-link">About</a></li>
+          <li><a href="#packages" class="footer-link">Packages</a></li>
+          <li><a href="#gallery" class="footer-link">Gallery</a></li>
+          <li><a href="https://www.instagram.com/glowingbooth.chi/" target="_blank" rel="noopener" class="footer-link">Instagram ↗</a></li>
+        </ul>
+        <div class="footer-copy">© 2026 Glowing Booth Chicago</div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Page in
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        document.body.style.opacity = '1';
+      }));
+    });
+
+    // Hero entrance
+    gsap.from('#hero-h1', { y: 60, opacity: 0, duration: 1.0, ease: 'power3.out', delay: 0.15 });
+    gsap.from('.hero-pills', { y: 20, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.05 });
+    gsap.from('.hero-sub', { y: 24, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.4 });
+    gsap.from('.hero-actions', { y: 20, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.55 });
+    gsap.from('.hero-proof', { y: 16, opacity: 0, duration: 0.7, ease: 'power3.out', delay: 0.7 });
+    gsap.from('#hero-right', { x: 40, opacity: 0, duration: 1.0, ease: 'power3.out', delay: 0.3 });
+
+    // Ticker
+    (function () {
+      const track = document.getElementById('ticker-track');
+      if (!track) return;
+      track.innerHTML += track.innerHTML;
+      gsap.to(track, { x: `-${track.scrollWidth / 2}px`, duration: 30, ease: 'none', repeat: -1 });
+    })();
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('on'); observer.unobserve(e.target); }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('[data-reveal], [data-stagger]').forEach(el => observer.observe(el));
+
+    // Counters
+    function animateCounter(el, target, dur) {
+      const start = performance.now();
+      const tick = now => {
+        const p = Math.min((now - start) / dur, 1);
+        const v = Math.round((1 - Math.pow(1 - p, 3)) * target);
+        el.textContent = v.toLocaleString();
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+    document.querySelectorAll('[data-counter]').forEach(el => {
+      new IntersectionObserver(([e]) => {
+        if (e.isIntersecting) { animateCounter(el, +el.dataset.counter, 1400); el.dataset.counter = ''; }
+      }, { threshold: 0.5 }).observe(el);
+    });
+
+    // Gallery drag scroll
+    const track = document.getElementById('gallery-track');
+    if (track) {
+      let isDown = false, startX, scrollLeft;
+      track.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - track.offsetLeft; scrollLeft = track.scrollLeft; });
+      track.addEventListener('mouseleave', () => isDown = false);
+      track.addEventListener('mouseup', () => isDown = false);
+      track.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        track.scrollLeft = scrollLeft - (e.pageX - track.offsetLeft - startX);
+      });
+    }
+
+    // Form submit
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('[type=submit]');
+      btn.textContent = '✓ Request Sent! We\'ll be in touch soon 🎉';
+      btn.style.background = '#07CB9C';
+      btn.disabled = true;
+    }
+  </script>
+
+</body>
+</html>
