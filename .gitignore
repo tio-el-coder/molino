@@ -1,0 +1,28 @@
+# --- Brand and output data (never commit) ---
+brands/
+outputs/
+
+# --- Secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Local node_modules / build artifacts ---
+node_modules/
+package-lock.json
+yarn.lock
+dist/
+build/
+
+# --- macOS / editors ---
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# --- Logs ---
+*.log
+npm-debug.log*
