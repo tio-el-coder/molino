@@ -1,10 +1,12 @@
-# Design OS
+# molino
 
-A multi-brand design system that powers complete websites from a shared engine. One codebase, multiple brands. Claude is the primary builder — it reads brand context and generates HTML/CSS outputs that ship.
+> *Mill, in Spanish.* The engine that grinds brand context into shipping work.
+
+**molino** is the public engine of **Design OS** — a multi-brand design system where Claude is the primary builder. One engine, multiple brands. Claude reads the brand context and generates HTML/CSS outputs that ship.
 
 > **Mental model:** Engine (universal skills + agents) + Brand (isolated context) → Output (generated HTML).
 
-This repo is the **engine** — the agents, skills, and scripts that make the system work. Brand context and generated work live in private folders that are gitignored.
+This repo is the engine — the agents, skills, and scripts that make the system work. Brand context and generated work live in private folders that are gitignored.
 
 ---
 
