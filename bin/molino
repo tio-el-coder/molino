@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+/**
+ * molino — CLI entry point.
+ * Dispatches subcommands to engine/scripts/*.js
+ *
+ *   molino init [brand]       scaffold a new brand
+ *   molino extract [--brand]  extract tokens from Figma
+ *   molino --version
+ */
+
+'use strict';
+
+const path = require('path');
+const fs   = require('fs');
+
+const SCRIPTS = path.join(__dirname, '..', 'engine', 'scripts');
+const PKG     = path.join(__dirname, '..', 'package.json');
+
+const cmd = process.argv[2];
+const rest = process.argv.slice(3);
+
+function run(scriptName) {
+  const script = path.join(SCRIPTS, scriptName);
+  if (!fs.existsSync(script)) {
+    console.error(`molino: script not found — ${scriptName}`);
+    process.exit(1);
+  }
+  // Re-enter Node with the script; pass through stdin/stdout/stderr.
+  const { spawnSync } = require('child_process');
+  const r = spawnSync(process.execPath, [script, ...rest], { stdio: 'inherit' });
+  process.exit(r.status || 0);
+}
+
+function help() {
+  console.log(`
+molino — a multi-brand design system engine
+
+usage:
+  molino init [brand]               scaffold a new brand
+  molino init --name lumen --figma <url>
+  molino extract --brand <brand>    extract tokens from Figma
+  molino --version
+  molino --help
+
+learn more: https://github.com/tio-el-coder/molino
+`);
+}
+
+switch (cmd) {
+  case 'init':    return run('init.js');
+  case 'extract': return run('extract-tokens.js');
+  case '--version':
+  case '-v': {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(PKG, 'utf8'));
+      console.log(pkg.version);
+    } catch (_) { console.log('0.0.0'); }
+    process.exit(0);
+  }
+  case '--help':
+  case '-h':
+  case undefined:
+    help();
+    process.exit(0);
+  default:
+    console.error(`molino: unknown command "${cmd}"`);
+    help();
+    process.exit(1);
+}

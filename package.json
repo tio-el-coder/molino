@@ -1,0 +1,38 @@
+{
+  "name": "molino",
+  "version": "0.1.0",
+  "description": "A multi-brand design system engine. One engine, many brands. Claude is the primary builder.",
+  "homepage": "https://github.com/tio-el-coder/molino",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tio-el-coder/molino.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "molino": "./bin/molino"
+  },
+  "files": [
+    "bin/",
+    "engine/",
+    "examples/",
+    "docs/",
+    "CLAUDE.md",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "init": "node engine/scripts/init.js",
+    "extract": "node engine/scripts/extract-tokens.js"
+  },
+  "keywords": [
+    "design-system",
+    "design-tokens",
+    "figma",
+    "claude",
+    "multi-brand",
+    "ai-design"
+  ]
+}

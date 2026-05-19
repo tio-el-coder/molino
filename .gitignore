@@ -2,12 +2,21 @@
 brands/
 outputs/
 
-# --- Secrets ---
+# --- Secrets (never commit) ---
 .env
 .env.*
+**/.env
+**/.env.*
 !.env.example
+!**/.env.example
 *.pem
 *.key
+*.p12
+*_rsa
+*_rsa.pub
+id_*
+credentials.json
+secrets.json
 
 # --- Local node_modules / build artifacts ---
 node_modules/

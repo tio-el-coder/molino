@@ -4,7 +4,28 @@
 
 **molino** is the public engine of **Design OS** — a multi-brand design system where Claude is the primary builder. One engine, multiple brands. Claude reads the brand context and outputs HTML + CSS that ships.
 
-[**See it shipping →**](https://arturohurtado.com) &nbsp;·&nbsp; [**Worked example →**](./examples/glowing-booth/) &nbsp;·&nbsp; [**How it works →**](./docs/HOW-IT-WORKS.md)
+[**See it shipping →**](https://arturohurtado.com) &nbsp;·&nbsp; [**Worked example →**](./examples/glowing-booth/) &nbsp;·&nbsp; [**How it works →**](./docs/HOW-IT-WORKS.md) &nbsp;·&nbsp; [**Security →**](./SECURITY.md)
+
+---
+
+## Quickstart
+
+```bash
+git clone https://github.com/tio-el-coder/molino.git
+cd molino
+./bin/molino init lumen --figma https://www.figma.com/design/<key>/<name>
+```
+
+That scaffolds `brands/lumen/` with starter context files and `outputs/lumen/` for generated work. Add your Figma token to `brands/lumen/.env`, run `./bin/molino extract --brand lumen` to pull live tokens, then ship.
+
+```bash
+./bin/molino --help                       # all commands
+./bin/molino init                         # interactive
+./bin/molino init lumen                   # named, prompts for Figma URL
+./bin/molino extract --brand lumen        # pull Figma tokens
+```
+
+Zero npm dependencies. Node 18+. Everything runs locally.
 
 ---
 
@@ -29,6 +50,9 @@ One engine. Many brands. Each brand stays isolated — never mixes context, neve
 ## What's in this repo
 
 ```
+bin/
+  molino                  ← CLI entry point (init, extract, --help, --version)
+
 engine/
   agents/
     figma-sync.md         ← reads/writes Figma tokens via MCP
@@ -38,6 +62,7 @@ engine/
     ui-animation.md       ← motion principles, scroll reveal, GSAP usage
   scripts/
     brand.sh              ← shell helper: loads context + invokes Claude
+    init.js               ← `molino init` — scaffold a new brand
     extract-tokens.js     ← Node: Figma API → tokens.json + variables.css
     watch-references.js   ← reference folder watcher for moodboarding
 
@@ -53,6 +78,7 @@ docs/
   HOW-IT-WORKS.md         ← a case-study walkthrough of a real build
 
 CLAUDE.md                 ← architecture + conventions Claude reads first
+SECURITY.md               ← threat model + reporting policy
 ```
 
 ---
@@ -108,6 +134,12 @@ Before any generation, Claude reads (in this order):
 - **Animation:** GSAP + ScrollTrigger via CDN for choreographed motion; CSS transitions for hover/focus
 - **Token extraction:** Node 18+
 - **AI:** Claude (Opus or Sonnet) via the Claude Agent SDK / Claude Code
+
+---
+
+## Security
+
+molino runs locally, has zero npm dependencies, and never sends telemetry. Secrets (`.env`) and brand work (`brands/`, `outputs/`) are gitignored by default. `molino init` validates brand names against path traversal, blocks reserved names, and refuses to write through symlinks. Read [SECURITY.md](./SECURITY.md) before pointing it at a real Figma token, and use a read-only scoped token when you can.
 
 ---
 
