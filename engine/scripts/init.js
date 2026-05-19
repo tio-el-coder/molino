@@ -397,6 +397,8 @@ async function main() {
   console.log(`     pulls live tokens from Figma into tokens/variables.css`);
   console.log(`  3. Edit ${C.cyan}brands/${brand}/design-taste.md${C.reset} and ${C.cyan}design-director.md${C.reset}`);
   console.log(`  4. ${C.cyan}./engine/scripts/brand.sh ${brand} "build a landing page"${C.reset}`);
+  console.log(`     ${C.gray}requires Claude Code installed + Figma MCP connected${C.reset}`);
+  console.log(`     ${C.gray}see README.md → Prerequisites${C.reset}`);
   console.log('');
   console.log(`${C.bold}security:${C.reset}`);
   console.log(`  · ${C.gray}brands/ and outputs/ are gitignored — your tokens never leave your machine${C.reset}`);

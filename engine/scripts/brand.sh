@@ -12,10 +12,24 @@ BRAND=$1
 shift
 PROMPT="$@"
 
+# Preflight: require the Claude Code CLI to be installed.
+# molino does NOT bundle an LLM — it loads brand context and hands it to `claude`.
+if ! command -v claude >/dev/null 2>&1; then
+  echo "❌ Claude Code CLI not found on your PATH."
+  echo ""
+  echo "   molino is the engine — it loads brand context, but Claude is what builds."
+  echo "   Install it: https://claude.com/claude-code"
+  echo "   Then authenticate: \`claude login\`"
+  echo ""
+  echo "   You'll also want the Figma MCP server connected so the engine can"
+  echo "   read & write Figma. See README.md → Prerequisites."
+  exit 127
+fi
+
 if [ -z "$BRAND" ]; then
   echo "❌ Usage: ./engine/scripts/brand.sh [brand-name] \"your prompt\""
   echo "   Available brands:"
-  ls brands/
+  ls brands/ 2>/dev/null || echo "   (none yet — run \`./bin/molino init <brand>\` first)"
   exit 1
 fi
 

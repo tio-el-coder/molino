@@ -8,21 +8,51 @@
 
 ---
 
+## Prerequisites
+
+molino is the **engine** — it loads brand context, scaffolds, and extracts tokens. The thing that actually *builds* is Claude. You need three things on your machine before this is useful:
+
+| | What | Why | How |
+|---|---|---|---|
+| 1 | **Node.js 18+** | runs the CLI + token extractor | https://nodejs.org or `brew install node` |
+| 2 | **Claude Code** (the CLI) | the LLM that reads context and writes HTML/CSS | https://claude.com/claude-code → `claude login` |
+| 3 | **Figma MCP** (connected to Claude) | lets Claude read your Figma file and write design system files | inside Claude Code: `/mcp` → connect the Figma server, then authenticate |
+
+You'll also need a **Figma personal access token** if you want to run `molino extract` (token extraction via the REST API). Generate one with read-only scope: https://www.figma.com/developers/api#access-tokens
+
+Without #2 and #3, `./bin/molino init` and `./bin/molino extract` still work, but `./engine/scripts/brand.sh` will refuse to run.
+
+---
+
 ## Quickstart
 
 ```bash
+# 1. Clone
 git clone https://github.com/tio-el-coder/molino.git
 cd molino
-./bin/molino init lumen --figma https://www.figma.com/design/<key>/<name>
+
+# 2. Scaffold a new brand (interactive — asks for the name + optional Figma URL)
+./bin/molino init lumen
+
+# 3. (Optional) Pull live tokens from Figma
+#    First: cp brands/lumen/.env.example brands/lumen/.env  and add FIGMA_TOKEN + FIGMA_FILE_KEY
+./bin/molino extract --brand lumen
+
+# 4. Fill in brands/lumen/design-taste.md and design-director.md by hand
+#    (or ask Claude to do it: "draft design-taste.md for lumen, the brand is X")
+
+# 5. Build something — this needs Claude Code installed (step 2 of Prerequisites)
+./engine/scripts/brand.sh lumen "build a landing page for the product"
 ```
 
-That scaffolds `brands/lumen/` with starter context files and `outputs/lumen/` for generated work. Add your Figma token to `brands/lumen/.env`, run `./bin/molino extract --brand lumen` to pull live tokens, then ship.
+Claude Code will read `CLAUDE.md`, the engine skills, then `brands/lumen/*.md`, then write the page to `outputs/lumen/websites/`. If you have the Figma MCP connected, you can also ask Claude things like *"create a Figma design system for lumen using its tokens"* and it will build the file for you (the way [this design system](https://www.figma.com/design/3hMXKGLgl6lSw3BMNWSe5M) was built).
 
 ```bash
 ./bin/molino --help                       # all commands
 ./bin/molino init                         # interactive
 ./bin/molino init lumen                   # named, prompts for Figma URL
 ./bin/molino extract --brand lumen        # pull Figma tokens
+./bin/molino --version
 ```
 
 Zero npm dependencies. Node 18+. Everything runs locally.
